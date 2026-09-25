@@ -33,12 +33,14 @@ jobs:
 
       - name: Build APK
         run: |
-          cd extracted
+          PROJECT_DIR=$(dirname "$(find extracted -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" \) -print -quit)")
+          echo "Project directory: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
           gradle assembleDebug
 
       - name: Find APK
         run: |
-          find extracted -name "*.apk" -type f
+          find extracted -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
