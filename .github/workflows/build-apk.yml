@@ -1,0 +1,45 @@
+name: Build Check Calendar APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'CheckCalendar-Full.zip'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract project
+        run: |
+          mkdir extracted
+          unzip -q CheckCalendar-Full.zip -d extracted
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build APK
+        run: |
+          cd extracted
+          find . -name gradlew -type f -exec chmod +x {} \;
+          GRADLEW=$(find . -name gradlew -type f | head -1)
+          DIR=$(dirname "$GRADLEW")
+          cd "$DIR"
+          ./gradlew assembleDebug
+
+      - name: Find APK
+        run: find extracted -name "*.apk" -type f
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CheckCalendar-APK
+          path: extracted/**/build/outputs/apk/debug/*.apk
